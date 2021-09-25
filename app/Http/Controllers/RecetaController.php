@@ -25,8 +25,16 @@ class RecetaController extends Controller
      */
     public function index()
     {
-        $userRecetas=Auth::user()->userRecetas;
-        return view('recetas.index')->with('userRecetas',$userRecetas);
+        // $usuario=Auth::user();
+        $usuario=Auth::user()->id;
+        $userRecetas=Receta::where('user_id' ,$usuario)->paginate(2);
+        //$userRecetas=Auth::user()->userRecetas;
+
+        //Recetas que le gusta el usuario
+        $iLikes=Auth::user()->ilike;
+        return view('recetas.index')->with('userRecetas',$userRecetas)
+                                     ->with('iLikes', $iLikes);
+                                   //  ->with('usuario',$usuario);
     }
 
     /**
@@ -108,7 +116,14 @@ class RecetaController extends Controller
      */
     public function show(Receta $receta)
     {
-        return view('recetas.show')->with('receta',$receta);
+        //Si el usuario autentificado ld dio like a la receta
+         $like=(Auth::user()) ? Auth::user()->iLike->contains($receta->id) : false;
+
+        //Cantidad de Likes en la receta Actual 
+        $likes=$receta->likes()->count();
+        return view('recetas.show')->with('receta',$receta)
+                                   ->with('like',$like)
+                                   ->with('likes',$likes);
     }
 
     /**
@@ -119,7 +134,8 @@ class RecetaController extends Controller
      */
     public function edit(Receta $receta)
     {
-        
+        //Verificacion del policy
+        $this->authorize('view', $receta );
         $categorias=CategoriaReceta::all(['id','nombre']);
         return view('recetas.edit')->with('categorias',$categorias)
                                    ->with('receta', $receta);
@@ -136,8 +152,9 @@ class RecetaController extends Controller
     public function update(Request $request, Receta $receta)
     {
 
-       
-        //validacion
+        //Verificacion del policy
+
+        $this->authorize('update', $receta );        
         $data=$request->validate([
 
             'nombre'=>'required|min:6',
@@ -181,6 +198,13 @@ class RecetaController extends Controller
      */
     public function destroy(Receta $receta)
     {
-        //
+        //Verificacion del policy
+
+        $this->authorize('delete', $receta );
+        //return "desde el eliminar";
+
+        //Agregar Metodo Eliminar
+        $receta->delete();
+        return redirect()->action([RecetaController::class, 'index']);
     }
 }

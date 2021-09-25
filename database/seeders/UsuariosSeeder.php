@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,7 @@ class UsuariosSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
+        $user=User::create([
 
             'name'=> 'Lenin Diaz',
             'email'=> 'lenincoro10@hotmail.com',
@@ -24,7 +25,7 @@ class UsuariosSeeder extends Seeder
             'updated_at'=>date('Y-m-d H:i:s'),
         ]);
 
-        DB::table('users')->insert([
+        $user=User::create([
 
             'name'=> 'Eduardo Diaz',
             'email'=> 'lenindiaz1998@hotmail.com',
